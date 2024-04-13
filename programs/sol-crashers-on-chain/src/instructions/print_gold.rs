@@ -6,8 +6,14 @@ use anchor_spl::{
     }
 };
 
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
+pub enum Currency {
+    Gold,
+    Gem,
+}
+
 #[derive(Accounts)]
-pub struct PrintGold<'info> {
+pub struct PrintCurrency<'info> {
     #[account(
         init_if_needed,
         payer = payer,
@@ -32,7 +38,7 @@ pub struct PrintGold<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub fn handler(ctx: Context<PrintGold>, amount: u64) -> Result<()> {
+pub fn handler(ctx: Context<PrintCurrency>, amount: u64) -> Result<()> {    
     let seeds = &["mint".as_bytes(), &[ctx.bumps.mint]];
     let signer = [&seeds[..]];
 

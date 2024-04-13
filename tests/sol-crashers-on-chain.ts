@@ -40,9 +40,8 @@ describe("sol-crashers-on-chain", () => {
   });
 
   it("Minted gold", async () => {
-
     const tx = await program.methods
-    .printGold(new anchor.BN(300))
+    .printCurrency(new anchor.BN(300), {gold: {}})
     .accounts({
       mint: mintPK,
       payer: developerKP.publicKey,
