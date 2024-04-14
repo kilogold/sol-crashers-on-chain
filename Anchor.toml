@@ -15,8 +15,8 @@ sol_crashers_on_chain = "4LaDUjM73BdtSxjAH15rJmGv4aLYGHSMRtXDK6BWhhyq"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
-wallet = "/Users/kbonilla/.config/solana/phantom-t1.json"
+cluster = "localnet"
+wallet = "/Users/kbonilla/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
