@@ -7,7 +7,7 @@ use anchor_spl::{
 };
 
 #[derive(Accounts)]
-pub struct PrintGold<'info> {
+pub struct PrintGems<'info> {
     #[account(
         init_if_needed,
         payer = payer,
@@ -21,7 +21,7 @@ pub struct PrintGold<'info> {
 
     #[account(
         mut,
-        seeds = [b"mint", b"gold"],
+        seeds = [b"mint", b"gems"],
         bump,
     )]
     pub mint: Account<'info, Mint>,
@@ -32,8 +32,8 @@ pub struct PrintGold<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub fn handler(ctx: Context<PrintGold>, amount: u64) -> Result<()> {    
-    let seeds = &["mint".as_bytes(), "gold".as_bytes(), &[ctx.bumps.mint]];
+pub fn handler(ctx: Context<PrintGems>, amount: u64) -> Result<()> {    
+    let seeds = &["mint".as_bytes(), "gems".as_bytes(), &[ctx.bumps.mint]];
     let signer = [&seeds[..]];
 
     token::mint_to(

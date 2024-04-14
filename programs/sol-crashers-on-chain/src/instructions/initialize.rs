@@ -11,11 +11,21 @@ pub struct Initialize<'info> {
         init, 
         payer = payer, 
         mint::decimals = 0, 
-        mint::authority = mint, 
-        seeds = [b"mint"], 
+        mint::authority = mint_gold, 
+        seeds = [b"mint", b"gold"], 
         bump
     )]
-    pub mint: Account<'info, Mint>,
+    pub mint_gold: Account<'info, Mint>,
+
+    #[account(
+        init, 
+        payer = payer, 
+        mint::decimals = 0, 
+        mint::authority = mint_gems, 
+        seeds = [b"mint", b"gems"], 
+        bump
+    )]
+    pub mint_gems: Account<'info, Mint>,
 
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -25,6 +35,7 @@ pub struct Initialize<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-pub fn handler(_ctx: Context<Initialize>) -> Result<()> {    
+pub fn handler(_ctx: Context<Initialize>) -> Result<()> { 
+    msg!("Initializing mint accounts for Gold and Gems.");   
     Ok(())
 }
