@@ -13,24 +13,26 @@ describe("sol-crashers-on-chain", () => {
   const program = anchor.workspace.SolCrashersOnChain as Program<SolCrashersOnChain>;
   const developerKP = (program.provider as anchor.AnchorProvider).wallet; //me, my filesys wallet.
   
-  const [mintGoldPK, goldBump] = anchor.web3.PublicKey.findProgramAddressSync(
+  const [mintGoldPK] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("mint"), Buffer.from("gold")],
     program.programId
   );
-  const [mintGemsPK, gemsBump] = anchor.web3.PublicKey.findProgramAddressSync(
+  const [mintGemsPK] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("mint"), Buffer.from("gems")],
     program.programId
   );
 
+  const [developer_gemsATA] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("gems"), developerKP.publicKey.toBuffer()],
+    program.programId
+  );
+  
   const developer_goldATA = getAssociatedTokenAddressSync(
     mintGoldPK,
     developerKP.publicKey
   );
 
-  const developer_gemsATA = getAssociatedTokenAddressSync(
-    mintGemsPK,
-    developerKP.publicKey
-  );
+
 
   it("Is initialized!", async () => {
 
@@ -47,9 +49,9 @@ describe("sol-crashers-on-chain", () => {
     console.log("Program ID:\t%s", program.programId.toBase58());
     console.log("Mint Gold PK:\t%s", mintGoldPK.toBase58());
     console.log("Mint Gems PK:\t%s", mintGemsPK.toBase58());
-    console.log("ATA PK:\t\t%s", developer_goldATA.toBase58());
+    console.log("ATA Gold PK:\t\t%s", developer_goldATA.toBase58());
+    console.log("ATA Gems PK:\t\t%s", developer_gemsATA.toBase58());
   });
-
   it("Minted gold", async () => {
     const tx = await program.methods
     .printGold(new anchor.BN(300))
@@ -63,7 +65,6 @@ describe("sol-crashers-on-chain", () => {
     const new_amount = Number((await getAccount(program.provider.connection, developer_goldATA)).amount);
     assert.isAbove(new_amount, 0, "Amount should be greater than 0");
   });
-
   it("Minted two gems", async () => {
     const tx = await program.methods
     .printGems(new anchor.BN(2))
@@ -72,7 +73,10 @@ describe("sol-crashers-on-chain", () => {
       payer: developerKP.publicKey,
       dstAta: developer_gemsATA,
     })
-    .rpc();
+    .rpc().catch((err) => {
+      console.log(err);
+    }
+    );
 
     const new_amount = Number((await getAccount(program.provider.connection, developer_gemsATA)).amount);
     assert.equal(new_amount, 2, "Amount should be greater than 0");
