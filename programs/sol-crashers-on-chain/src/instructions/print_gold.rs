@@ -11,8 +11,10 @@ pub struct PrintGold<'info> {
     #[account(
         init_if_needed,
         payer = payer,
-        associated_token::mint = mint,
-        associated_token::authority = payer
+        token::mint = mint,
+        token::authority = mint,
+        seeds = [b"gold".as_ref(), payer.key().as_ref()],
+        bump
     )]
     pub dst_ata: Account<'info, TokenAccount>,
 
@@ -32,7 +34,29 @@ pub struct PrintGold<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub fn handler(ctx: Context<PrintGold>, amount: u64) -> Result<()> {    
+/// Checks if the given data slice is entirely zeroed out.
+fn is_zeroed(data: &[u8]) -> bool {
+    data.iter().all(|&byte| byte == 0)
+}
+
+pub fn handler(ctx: Context<PrintGold>, amount: u64) -> Result<()> {
+
+    // TODO: Consider refactoring initialization into a discrete instruction
+    // to avoid excessive CU usage.
+
+    // Initialize the token account with the program's mint PDA as authority
+    if is_zeroed(&ctx.accounts.dst_ata.to_account_info().data.borrow()) {
+        let cpi_accounts = token::InitializeAccount {
+            account: ctx.accounts.dst_ata.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            authority: ctx.accounts.payer.to_account_info(),
+            rent: ctx.accounts.rent.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.associated_token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::initialize_account(cpi_ctx)?;
+    }
+
     let seeds = &["mint".as_bytes(), "gold".as_bytes(), &[ctx.bumps.mint]];
     let signer = [&seeds[..]];
 

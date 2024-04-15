@@ -1,10 +1,10 @@
 
 use anchor_lang::prelude::*;
-use anchor_spl::{
-    associated_token::*, token::{
+use anchor_spl::
+    token::{
         self, MintTo, Mint, TokenAccount, Token
     }
-};
+;
 
 #[derive(Accounts)]
 pub struct PrintGems<'info> {

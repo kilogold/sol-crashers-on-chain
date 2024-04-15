@@ -27,9 +27,9 @@ describe("sol-crashers-on-chain", () => {
     program.programId
   );
   
-  const developer_goldATA = getAssociatedTokenAddressSync(
-    mintGoldPK,
-    developerKP.publicKey
+  const [developer_goldATA] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("gold"), developerKP.publicKey.toBuffer()],
+    program.programId
   );
 
 
@@ -52,6 +52,7 @@ describe("sol-crashers-on-chain", () => {
     console.log("ATA Gold PK:\t\t%s", developer_goldATA.toBase58());
     console.log("ATA Gems PK:\t\t%s", developer_gemsATA.toBase58());
   });
+
   it("Minted gold", async () => {
     const tx = await program.methods
     .printGold(new anchor.BN(300))
@@ -65,6 +66,7 @@ describe("sol-crashers-on-chain", () => {
     const new_amount = Number((await getAccount(program.provider.connection, developer_goldATA)).amount);
     assert.isAbove(new_amount, 0, "Amount should be greater than 0");
   });
+
   it("Minted two gems", async () => {
     const tx = await program.methods
     .printGems(new anchor.BN(2))
@@ -80,5 +82,22 @@ describe("sol-crashers-on-chain", () => {
 
     const new_amount = Number((await getAccount(program.provider.connection, developer_gemsATA)).amount);
     assert.equal(new_amount, 2, "Amount should be greater than 0");
+  });
+
+  it("Minted one more gem", async () => {
+    const tx = await program.methods
+    .printGems(new anchor.BN(1))
+    .accounts({
+      mint: mintGemsPK,
+      payer: developerKP.publicKey,
+      dstAta: developer_gemsATA,
+    })
+    .rpc().catch((err) => {
+      console.log(err);
+    }
+    );
+
+    const new_amount = Number((await getAccount(program.provider.connection, developer_gemsATA)).amount);
+    assert.equal(new_amount, 3, "Amount should be greater than 0");
   });
 });
