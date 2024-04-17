@@ -24,4 +24,12 @@ pub mod sol_crashers_on_chain {
     pub fn print_gems(ctx: Context<PrintGems>, amount: u64) -> Result<()> {
         print_gems::handler(ctx, amount)
     }
+
+    pub fn burn_gold(ctx: Context<BurnGold>, amount: u64) -> Result<()> {
+        burn_gold::handler(ctx, amount)
+    }
+
+    pub fn burn_gems(ctx: Context<BurnGems>, amount: u64) -> Result<()> {
+        burn_gems::handler(ctx, amount)
+    }
 }

@@ -47,15 +47,16 @@ describe("sol-crashers-on-chain", () => {
 
     console.log("Transaction signature: %s", tx);
     console.log("Program ID:\t%s", program.programId.toBase58());
+    console.log("Payer:\t\t%s", developerKP.publicKey);
     console.log("Mint Gold PK:\t%s", mintGoldPK.toBase58());
     console.log("Mint Gems PK:\t%s", mintGemsPK.toBase58());
-    console.log("ATA Gold PK:\t\t%s", developer_goldATA.toBase58());
-    console.log("ATA Gems PK:\t\t%s", developer_gemsATA.toBase58());
+    console.log("ATA Gold PK:\t%s", developer_goldATA.toBase58());
+    console.log("ATA Gems PK:\t%s", developer_gemsATA.toBase58());
   });
 
   it("Minted gold", async () => {
     const tx = await program.methods
-    .printGold(new anchor.BN(300))
+    .printGold(new anchor.BN(299))
     .accounts({
       mint: mintGoldPK,
       payer: developerKP.publicKey,
@@ -99,5 +100,39 @@ describe("sol-crashers-on-chain", () => {
 
     const new_amount = Number((await getAccount(program.provider.connection, developer_gemsATA)).amount);
     assert.equal(new_amount, 3, "Amount should be greater than 0");
+  });
+
+  it("Burned gold", async () => {
+    const tx = await program.methods
+    .burnGold(new anchor.BN(1))
+    .accounts({
+      mint: mintGoldPK,
+      payer: developerKP.publicKey,
+      dstAta: developer_goldATA,
+    })
+    .rpc().catch((err) => {
+      console.log(err);
+    }
+    );
+
+    const new_amount = Number((await getAccount(program.provider.connection, developer_goldATA)).amount);
+    assert.equal(new_amount, 298, "Amount should be greater than 0");
+  });
+
+  it("Burned gems", async () => {
+    const tx = await program.methods
+    .burnGems(new anchor.BN(2))
+    .accounts({
+      mint: mintGemsPK,
+      payer: developerKP.publicKey,
+      dstAta: developer_gemsATA,
+    })
+    .rpc().catch((err) => {
+      console.log(err);
+    }
+    );
+
+    const new_amount = Number((await getAccount(program.provider.connection, developer_gemsATA)).amount);
+    assert.equal(new_amount, 1, "Amount should be greater than 0");
   });
 });

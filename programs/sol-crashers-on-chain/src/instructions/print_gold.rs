@@ -1,10 +1,10 @@
 
 use anchor_lang::prelude::*;
-use anchor_spl::{
-    associated_token::*, token::{
+use anchor_spl::
+    token::{
         self, MintTo, Mint, TokenAccount, Token
     }
-};
+;
 
 #[derive(Accounts)]
 pub struct PrintGold<'info> {
@@ -28,7 +28,6 @@ pub struct PrintGold<'info> {
     )]
     pub mint: Account<'info, Mint>,
     
-    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,
@@ -52,7 +51,7 @@ pub fn handler(ctx: Context<PrintGold>, amount: u64) -> Result<()> {
             authority: ctx.accounts.payer.to_account_info(),
             rent: ctx.accounts.rent.to_account_info(),
         };
-        let cpi_program = ctx.accounts.associated_token_program.to_account_info();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::initialize_account(cpi_ctx)?;
     }
